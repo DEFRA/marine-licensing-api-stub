@@ -113,12 +113,12 @@ git config --global core.autocrlf false
 
 ## API endpoints
 
-| Endpoint             | Description                    |
-| :------------------- | :----------------------------- |
-| `GET: /health`       | Health                                     |
+| Endpoint             | Description                                        |
+| :------------------- | :------------------------------------------------- |
+| `GET: /health`       | Health                                             |
 | `POST: /<any-path>`  | ArcGIS stub response (accepts any path/query/body) |
-| `GET: /example    `  | Example API (remove as needed)             |
-| `GET: /example/<id>` | Example API (remove as needed)             |
+| `GET: /example    `  | Example API (remove as needed)                     |
+| `GET: /example/<id>` | Example API (remove as needed)                     |
 
 ### ArcGIS stub endpoint
 

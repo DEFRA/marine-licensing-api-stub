@@ -26,12 +26,8 @@ describe('POST ArcGIS Stub Endpoint', () => {
 
     expect(payload.objectIdFieldName).toBe('OBJECTID_12')
     expect(payload.features).toHaveLength(5)
-    expect(payload.features.map((feature) => feature.attributes.PolicyCode)).toEqual([
-      'E-AGG-3',
-      'E-MPA-1',
-      'E-BIO-1',
-      'E-BIO-2',
-      'E-CAB-1'
-    ])
+    expect(
+      payload.features.map((feature) => feature.attributes.PolicyCode)
+    ).toEqual(['E-AGG-3', 'E-MPA-1', 'E-BIO-1', 'E-BIO-2', 'E-CAB-1'])
   })
 })
