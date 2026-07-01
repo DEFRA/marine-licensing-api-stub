@@ -113,12 +113,12 @@ git config --global core.autocrlf false
 
 ## API endpoints
 
-| Endpoint             | Description                                        |
-| :------------------- | :------------------------------------------------- |
-| `GET: /health`       | Health                                             |
-| `POST: /<any-path>`  | ArcGIS stub response (accepts any path/query/body) |
-| `GET: /example    `  | Example API (remove as needed)                     |
-| `GET: /example/<id>` | Example API (remove as needed)                     |
+| Endpoint                                                           | Description                                   |
+| :----------------------------------------------------------------- | :-------------------------------------------- |
+| `GET: /health`                                                     | Health                                        |
+| `POST: /ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/<any>` | ArcGIS stub response (accepts any query/body) |
+| `GET: /example    `                                                | Example API (remove as needed)                |
+| `GET: /example/<id>`                                               | Example API (remove as needed)                |
 
 ### ArcGIS stub endpoint
 
@@ -129,14 +129,14 @@ The ArcGIS stub route is defined using the backend-style API module structure:
 
 Behaviour:
 
-- Accepts `POST` requests on any path (`/{any*}`)
-- Accepts any query params and payload
+- Accepts `POST` requests under `/ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/`
+- Accepts any query params and payload on that path
 - Returns a fixed ArcGIS-style response with exactly 5 policies in `features`
 
 Example:
 
 ```bash
-curl -X POST "http://localhost:3001/arcgis/query?url=https%3A%2F%2Fexample.com&f=json" \
+curl -X POST "http://localhost:3001/ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/query?f=json" \
   -H "content-type: application/json" \
   -d '{"where":"1=1"}'
 ```

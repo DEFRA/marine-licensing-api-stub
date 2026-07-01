@@ -11,10 +11,10 @@ describe('POST ArcGIS Stub Endpoint', () => {
     await server?.stop({ timeout: 1000 })
   })
 
-  test('POST /{any*} returns ArcGIS response with five policies', async () => {
+  test('POST /ArcGIS/.../query returns ArcGIS response with five policies', async () => {
     const response = await server.inject({
       method: 'POST',
-      url: '/arcgis/query?url=https%3A%2F%2Fexample.com%2Ffeature-server&f=json',
+      url: '/ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/query?f=json',
       payload: {
         where: '1=1'
       }
@@ -29,5 +29,14 @@ describe('POST ArcGIS Stub Endpoint', () => {
     expect(
       payload.features.map((feature) => feature.attributes.PolicyCode)
     ).toEqual(['E-AGG-3', 'E-MPA-1', 'E-BIO-1', 'E-BIO-2', 'E-CAB-1'])
+  })
+
+  test('POST to unrelated path is not handled by ArcGIS stub', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/some-other-stub/query'
+    })
+
+    expect(response.statusCode).toBe(404)
   })
 })
