@@ -30,7 +30,7 @@
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "dependencies": {
-    "@defra/cdp-auditing": "0.6.0",
+    "@defra/cdp-auditing": "0.6.1",
     "@defra/cdp-metrics": "0.6.0",
     "@defra/hapi-secure-context": "0.4.0",
     "@defra/hapi-tracing": "1.30.0",
@@ -42,7 +42,7 @@
     "convict-format-with-validator": "6.2.0",
     "global-agent": "3.0.0",
     "hapi-pino": "13.0.0",
-    "hapi-pulse": "3.0.1",
+    "hapi-pulse": "4.0.0",
     "https-proxy-agent": "7.0.6",
     "joi": "18.2.1",
     "pino": "10.3.1",
