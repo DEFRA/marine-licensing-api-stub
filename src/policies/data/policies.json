@@ -53,9 +53,7 @@
     "objective": "7",
     "policy": "<p>Appropriate weight should be attached to biodiversity, reflecting the need to protect biodiversity as a whole, taking account of the best available evidence including on habitats and species that are protected or of conservation concern in the East marine plans and adjacent areas (marine, terrestrial).</p>",
     "policyAim": "<p>Appropriate weight should be attached to biodiversity, reflecting the need to protect biodiversity as a whole, taking account of the best available evidence including on habitats and species that are protected or of conservation concern in the East marine plans and adjacent areas (marine, terrestrial).</p>",
-    "relatedLayers": [
-      ""
-    ],
+    "relatedLayers": [""],
     "sector": "Environment (96)",
     "title": "E-BIO-1",
     "whatIsIt": "<p>It is essential to identify relevant habitats and species in the East marine plan areas and, where possible, the location of such interests and of sites important for biodiversity, including beyond Marine Protected Areas. The plan policy is made locally and spatially specific which show the location or distribution of broadscale habitats, and of some of the habitats and species that are protected or of conservation concern, based on best available evidence. This plan policy is intended to ensure that all current publically available evidence relating to biodiversity interest in the East marine plan areas is taken account of by the relevant public authority in the appropriate manner with advice from the Statutory Nature Conservation Bodies. It is important to note that the absence of evidence does not equate to the absence of features that are sensitive or of conservation concern; additional proposal specific evidence may be required. BIO1 also helps to ensure that commitments within the current legislative regime to biodiversity beyond designated sites are clearly understood by stakeholders. It provides signposting to what is currently considered to be the best available evidence on biodiversity interests in the East marine plan areas.</p>",
@@ -72,9 +70,7 @@
     "objective": "7",
     "policy": "<p>Where appropriate, proposals for development should incorporate features that enhance biodiversity and geological interests.</p>",
     "policyAim": "<p>This policy applies to both the inshore and offshore plan areas.</p><p><br></p><p>This policy adds value by providing a clear direction to public authorities that they should show a preference for proposals that enhance benefits to marine ecology, biodiversity and geological conservation. Such benefits may include the enhancement of resilience of ecosystems (for example to the effects of climate change), and the provision of ecosystem services such as flood protection and water filtration. ‘Where appropriate’ includes where it is reasonable to expect such features to be included that are consistent with or do not compromise (whether to do with technical constraints, cost or other reasons) the primary purpose for which the development is proposed. Identifying positive impacts of a proposal does not negate the need to assess negative impacts in line with whatever legislation or assessment requirements apply. Enhancement is not a substitute for avoidance, protection or mitigation measures. See East Plan paras: 217-219.</p>",
-    "relatedLayers": [
-      ""
-    ],
+    "relatedLayers": [""],
     "sector": "Environment (96)",
     "title": "E-BIO-2",
     "whatIsIt": "<p>The plan policy reflects the aspiration set out in the <a href=\"http://www.gov.uk/government/publications/uk-marine-policy-statement\" rel=\"noopener noreferrer\" target=\"_blank\">Marine Policy Statement</a> and the fact that such opportunities ‘should be maximised’.‘Where appropriate’ includes where it is reasonable to expect such features to be included that are consistent with or do not compromise (whether to do with technical constraints, cost or other reasons) the primary purpose for which the development is proposed.</p>",
@@ -91,9 +87,7 @@
     "objective": "10",
     "policy": "<p>Preference should be given to proposals for cable installation where the method of installation is burial. Where burial is not achievable, decisions should take account of protection measures for the cable that may be proposed by the applicant.</p>",
     "policyAim": "<p>This policy applies to both inshore and offshore plan areas. Links to policy GOV1, DD1, PS2, TR2.</p><p><br></p><p>This policy aims to ensure sub-sea cables are properly protected from damage and do not cause a safety issue for vessels, particularly in navigation channels. Burial of cables increases opportunities for co-location and co-existence with other activities. Public authorities should look to ensure that adverse impacts upon cable operations are in the first instance avoided. Where this is not possible, such impacts should be minimised through any mitigation proposals. Mitigation proposals will vary with cable type and purpose, as does any applicable legislation, including any environmental constraints.&nbsp;See East Plan paras: 417-422.</p>",
-    "relatedLayers": [
-      ""
-    ],
+    "relatedLayers": [""],
     "sector": "Subsea Cables (196)",
     "title": "E-CAB-1",
     "whatIsIt": "<p>The prevalent view from stakeholders throughout the marine planning process is that cable burial, where possible, is preferred in order to minimise impact and protect cables. This has the additional benefit of increasing co-location and co-existence opportunities eg; fishing, shipping and recreation (leisure boating). Therefore, a policy in preference of cable burial seeks to meet the needs of the sector whilst maximising the potential opportunity for other uses of the marine plan areas. Where cable burial is to be undertaken, the installation is to be compliant with all applicable legislation. Burial is reliant on compliance with management measures of any designated conservation sites. This is aligned also with the Safety Of Life At Sea aims.</p>",
