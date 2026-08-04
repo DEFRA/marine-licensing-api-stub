@@ -117,6 +117,7 @@ git config --global core.autocrlf false
 | :----------------------------------------------------------------- | :-------------------------------------------- |
 | `GET: /health`                                                     | Health                                        |
 | `POST: /ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/<any>` | ArcGIS stub response (accepts any query/body) |
+| `GET: /explore-marine-plans/api/policies`                          | GOV.UK policies API stub (5 policies)         |
 | `GET: /example    `                                                | Example API (remove as needed)                |
 | `GET: /example/<id>`                                               | Example API (remove as needed)                |
 
@@ -145,6 +146,36 @@ The controller also emits basic ECS-friendly logs for:
 
 - Request received (path/query metadata)
 - Response sent (feature count)
+
+### GOV.UK policies stub endpoint
+
+Drop-in replacement for `GOVUK_MARINE_POLICIES_API_URL` when
+`https://environment.data.gov.uk/explore-marine-plans/api/policies` is unavailable
+or times out.
+
+- Route index: `src/policies/api/index.js`
+- Controller: `src/policies/api/controllers/get-policies-stub.js`
+- Policy data: `src/policies/data/policies.json`
+
+Behaviour:
+
+- Accepts `GET` requests at `/explore-marine-plans/api/policies`
+- Returns a fixed JSON array of the same 5 policies stubbed by the ArcGIS endpoint:
+  `E-AGG-3`, `E-MPA-1`, `E-BIO-1`, `E-BIO-2`, `E-CAB-1`
+- Response shape matches the live GOV.UK Explore Marine Plans policies API
+  (`code`, wording fields, `sector`, etc.)
+
+Point the backend at this stub:
+
+```bash
+GOVUK_MARINE_POLICIES_API_URL=http://localhost:3001/explore-marine-plans/api/policies
+```
+
+Example:
+
+```bash
+curl "http://localhost:3001/explore-marine-plans/api/policies"
+```
 
 ## Development helpers
 
