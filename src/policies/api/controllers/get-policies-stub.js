@@ -1,6 +1,9 @@
+import { createRequire } from 'node:module'
 import Boom from '@hapi/boom'
 import { structureErrorForECS } from '#/common/helpers/logging/logger.js'
-import policies from '../../data/policies.json' with { type: 'json' }
+
+const require = createRequire(import.meta.url)
+const policies = require('../../data/policies.json')
 
 export const getPoliciesStubController = {
   options: {
