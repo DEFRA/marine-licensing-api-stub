@@ -125,7 +125,6 @@ git config --global core.autocrlf false
 | `POST: /dynamics/flows/exemptions/withdraw`                        | Dynamics exemption withdrawal stub (202)      |
 | `POST: /dynamics/flows/exemptions/update`                          | Dynamics exemption update stub (202)          |
 | `POST: /dynamics/flows/marine-licences`                            | Dynamics marine licence submission stub (202) |
-| `GET: /dynamics/flows/submissions`                                 | What the backend sent (last 50, newest first) |
 | `GET: /example    `                                                | Example API (remove as needed)                |
 | `GET: /example/<id>`                                               | Example API (remove as needed)                |
 
@@ -193,8 +192,10 @@ credentials or network access locally, so both the OAuth token call and the cont
 lookup are stubbed.
 
 - Route index: `src/dynamics/api/index.js`
-- Controllers: `src/dynamics/api/controllers/{post-token-stub,get-contact-stub,get-contacts-stub}.js`
-- Shared contact resolution: `src/dynamics/api/controllers/contacts.js`
+- Controllers: `src/dynamics/api/controllers/{post-token-stub,get-contacts-stub}.js`
+  (`get-contacts-stub.js` serves both contact routes, branching on whether a contact id
+  was given in the path)
+- Shared contact resolution: `src/dynamics/helpers/resolve-contact.js`
 - Contact data: `src/dynamics/data/contacts.json`
 
 Behaviour:
@@ -242,8 +243,7 @@ Dynamics locally means every queued submission retries and lands in the backend'
 `exemption-dynamics-queue-failed` collection.
 
 - Route index: `src/dynamics/api/index.js`
-- Controllers: `src/dynamics/api/controllers/{post-submission-stub,get-submissions-stub}.js`
-- In-memory recorder: `src/dynamics/api/controllers/submissions.js`
+- Controller: `src/dynamics/api/controllers/post-submission-stub.js`
 
 Behaviour:
 
@@ -252,10 +252,11 @@ Behaviour:
   discards the response body — and any other status makes it retry.
 - Query params are ignored, so the real flow URLs' `api-version` and `sig` are harmless.
 - Nothing is validated. The payload shape is owned by the backend's
-  `dynamics-client.js`; the stub deliberately does not duplicate it.
-- Each submission is recorded in memory (last 50) and readable at
-  `GET /dynamics/flows/submissions`, newest first — useful for checking what the backend
-  sent without digging through container logs. Restarting the stub clears it.
+  `dynamics-client.js`; the stub deliberately does not duplicate it. The contacts
+  endpoints are equally forgiving - a `$filter` clause whose id is not a GUID is
+  dropped, where real Dynamics would reject the whole query.
+- Nothing is stored. Each submission is logged (`dynamics_submission_stub_request`) and
+  discarded — check the stub's logs to see what the backend sent.
 
 Point the backend at this stub (see its `.env.template`). Note `DYNAMICS_API_URL` is a
 **base** URL — the backend appends `/exemptions` to it:
@@ -273,7 +274,6 @@ Example:
 curl -i -X POST "http://localhost:3001/dynamics/flows/exemptions" \
   -H 'content-type: application/json' \
   -d '{"reference":"EXE/2025/00099","status":"SUBMITTED"}'
-curl "http://localhost:3001/dynamics/flows/submissions"
 ```
 
 ## Development helpers

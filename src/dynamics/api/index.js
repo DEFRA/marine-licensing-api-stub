@@ -1,8 +1,6 @@
 import { postTokenStubController } from './controllers/post-token-stub.js'
-import { getContactStubController } from './controllers/get-contact-stub.js'
 import { getContactsStubController } from './controllers/get-contacts-stub.js'
 import { postSubmissionStubController } from './controllers/post-submission-stub.js'
-import { getSubmissionsStubController } from './controllers/get-submissions-stub.js'
 
 // Drop-in replacement paths for the Dynamics 365 integrations:
 //   DYNAMICS_TOKEN_URL                     -> /dynamics/oauth2/v2.0/token
@@ -21,7 +19,7 @@ export const dynamics = [
   {
     method: 'GET',
     path: '/dynamics/api/data/v9.2/contacts({contactId})',
-    ...getContactStubController
+    ...getContactsStubController
   },
   {
     method: 'GET',
@@ -47,11 +45,5 @@ export const dynamics = [
     method: 'POST',
     path: '/dynamics/flows/marine-licences',
     ...postSubmissionStubController('marineLicence')
-  },
-  // Not part of the Dynamics API - lets you see what the backend sent
-  {
-    method: 'GET',
-    path: '/dynamics/flows/submissions',
-    ...getSubmissionsStubController
   }
 ]
