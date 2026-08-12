@@ -121,6 +121,11 @@ git config --global core.autocrlf false
 | `POST: /dynamics/oauth2/v2.0/token`                                | Dynamics OAuth token stub                     |
 | `GET: /dynamics/api/data/v9.2/contacts(<guid>)`                    | Dynamics single contact stub                  |
 | `GET: /dynamics/api/data/v9.2/contacts`                            | Dynamics contacts collection stub (`$filter`) |
+| `POST: /dynamics/flows/exemptions`                                 | Dynamics exemption submission stub (202)      |
+| `POST: /dynamics/flows/exemptions/withdraw`                        | Dynamics exemption withdrawal stub (202)      |
+| `POST: /dynamics/flows/exemptions/update`                          | Dynamics exemption update stub (202)          |
+| `POST: /dynamics/flows/marine-licences`                            | Dynamics marine licence submission stub (202) |
+| `GET: /dynamics/flows/submissions`                                 | What the backend sent (last 50, newest first) |
 | `GET: /example    `                                                | Example API (remove as needed)                |
 | `GET: /example/<id>`                                               | Example API (remove as needed)                |
 
@@ -227,6 +232,48 @@ Example:
 
 ```bash
 curl "http://localhost:3001/dynamics/api/data/v9.2/contacts(00000000-0000-0000-0000-000000000001)?\$select=fullname"
+```
+
+### Dynamics submission flow stub endpoints
+
+Stands in for the Power Automate flows the backend's Dynamics queue poller posts to when an
+exemption or marine licence is submitted, withdrawn or updated. Without these, enabling
+Dynamics locally means every queued submission retries and lands in the backend's
+`exemption-dynamics-queue-failed` collection.
+
+- Route index: `src/dynamics/api/index.js`
+- Controllers: `src/dynamics/api/controllers/{post-submission-stub,get-submissions-stub}.js`
+- In-memory recorder: `src/dynamics/api/controllers/submissions.js`
+
+Behaviour:
+
+- All four POST routes accept any JSON payload and return **202** with a small
+  `{ status, operation, reference }` body. 202 is the only thing the backend checks — it
+  discards the response body — and any other status makes it retry.
+- Query params are ignored, so the real flow URLs' `api-version` and `sig` are harmless.
+- Nothing is validated. The payload shape is owned by the backend's
+  `dynamics-client.js`; the stub deliberately does not duplicate it.
+- Each submission is recorded in memory (last 50) and readable at
+  `GET /dynamics/flows/submissions`, newest first — useful for checking what the backend
+  sent without digging through container logs. Restarting the stub clears it.
+
+Point the backend at this stub (see its `.env.template`). Note `DYNAMICS_API_URL` is a
+**base** URL — the backend appends `/exemptions` to it:
+
+```bash
+DYNAMICS_API_URL=http://localhost:3001/dynamics/flows
+DYNAMICS_API_WITHDRAW_URL=http://localhost:3001/dynamics/flows/exemptions/withdraw
+DYNAMICS_API_UPDATE_EXEMPTION_URL=http://localhost:3001/dynamics/flows/exemptions/update
+DYNAMICS_MARINE_LICENCE_API_URL=http://localhost:3001/dynamics/flows/marine-licences
+```
+
+Example:
+
+```bash
+curl -i -X POST "http://localhost:3001/dynamics/flows/exemptions" \
+  -H 'content-type: application/json' \
+  -d '{"reference":"EXE/2025/00099","status":"SUBMITTED"}'
+curl "http://localhost:3001/dynamics/flows/submissions"
 ```
 
 ## Development helpers
