@@ -1,0 +1,42 @@
+[
+  {
+    "contactid": "16d5ffcc-3ef3-ee11-a1fe-000d3a86c43e",
+    "userid": "f0c19ba9-df1f-4cb8-bbe7-8078f13eabea",
+    "fullname": "Sally Self",
+    "firstname": "Sally",
+    "lastname": "Self",
+    "emailaddress1": "sally.self@example.com"
+  },
+  {
+    "contactid": "bf5edec1-79eb-ee11-a1fe-000d3a86c43e",
+    "userid": "3d403f24-0a0b-4081-89af-518a8561a125",
+    "fullname": "Jason Bourne",
+    "firstname": "Jason",
+    "lastname": "Bourne",
+    "emailaddress1": "jason.bourne@example.com"
+  },
+  {
+    "contactid": "29aa915e-3ef3-ee11-a1fe-000d3a86c43e",
+    "userid": "86a7607c-a1e7-41e5-a0b6-a41680d05a2a",
+    "fullname": "John Doe",
+    "firstname": "John",
+    "lastname": "Doe",
+    "emailaddress1": "john.doe@example.com"
+  },
+  {
+    "contactid": "4be47305-4ef3-ee11-a1fe-002248004a06",
+    "userid": "29d8b726-5fbe-4402-98ca-fee92131d3df",
+    "fullname": "John Silver",
+    "firstname": "John",
+    "lastname": "Silver",
+    "emailaddress1": "john.silver@example.com"
+  },
+  {
+    "contactid": "06b68b07-9296-4f7c-b74d-5fd59ef2a513",
+    "userid": "05e8abef-790c-48a9-a266-97de0b1da1e4",
+    "fullname": "John Doe",
+    "firstname": "John",
+    "lastname": "Doe",
+    "emailaddress1": "05e8abef-790c-48a9-a266-97de0b1da1e4@example.com"
+  }
+]

@@ -118,6 +118,9 @@ git config --global core.autocrlf false
 | `GET: /health`                                                     | Health                                        |
 | `POST: /ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/<any>` | ArcGIS stub response (accepts any query/body) |
 | `GET: /explore-marine-plans/api/policies`                          | GOV.UK policies API stub (5 policies)         |
+| `POST: /dynamics/oauth2/v2.0/token`                                | Dynamics OAuth token stub                     |
+| `GET: /dynamics/api/data/v9.2/contacts(<guid>)`                    | Dynamics single contact stub                  |
+| `GET: /dynamics/api/data/v9.2/contacts`                            | Dynamics contacts collection stub (`$filter`) |
 | `GET: /example    `                                                | Example API (remove as needed)                |
 | `GET: /example/<id>`                                               | Example API (remove as needed)                |
 
@@ -175,6 +178,55 @@ Example:
 
 ```bash
 curl "http://localhost:3001/explore-marine-plans/api/policies"
+```
+
+### Dynamics contact details stub endpoints
+
+Stands in for the Dynamics 365 contact details integration, which backs the
+"who is the exemption for" value in marine-licensing-backend. There are no Dynamics
+credentials or network access locally, so both the OAuth token call and the contacts
+lookup are stubbed.
+
+- Route index: `src/dynamics/api/index.js`
+- Controllers: `src/dynamics/api/controllers/{post-token-stub,get-contact-stub,get-contacts-stub}.js`
+- Shared contact resolution: `src/dynamics/api/controllers/contacts.js`
+- Contact data: `src/dynamics/data/contacts.json`
+
+Behaviour:
+
+- `POST /dynamics/oauth2/v2.0/token` accepts any client credentials payload and returns a
+  fixed `access_token`. The client secret is never logged.
+- `GET /dynamics/api/data/v9.2/contacts(<guid>)` returns a single contact entity with
+  `fullname` (plus `firstname`, `lastname`, `emailaddress1`). `$select` is ignored.
+- `GET /dynamics/api/data/v9.2/contacts?$filter=contactid eq '<guid>' or ...` returns an
+  OData collection `{ value: [{ contactid, fullname }] }`, used for batch lookups. With no
+  `$filter` it returns every fixture contact.
+- The fixture holds the five test users seeded into the local CDP defra-id stub
+  (`Sally Self`, `Jason Bourne`, `John Doe`, `John Silver`, and a second `John Doe`), so the
+  name shown in the service is the name of the user you logged in as. It mirrors
+  `marine-licensing-frontend/compose/users/*.json` — re-sync `src/dynamics/data/contacts.json`
+  if those fixtures change.
+- Contacts are keyed on the registration's **`contactId`**, which is what the backend stores
+  on exemptions and looks up — not the `userId` you type on the stub login page. The `userId`
+  is accepted as an alias for convenience; the id that was asked for is echoed back as
+  `contactid`.
+- Any other valid GUID resolves to a placeholder named after itself
+  (`3fa85f64-…` → `Test User 3fa85f64`), so locally seeded contact IDs always return
+  something without looking like a real person. A non-GUID id returns a Dynamics-shaped 404.
+
+Point the backend at this stub (see its `.env.template`):
+
+```bash
+DYNAMICS_ENABLED=true
+DYNAMICS_TOKEN_URL=http://localhost:3001/dynamics/oauth2/v2.0/token
+DYNAMICS_API_CONTACT_DETAILS_URL='http://localhost:3001/dynamics/api/data/v9.2/contacts({{contactId}})?$select=fullname'
+DYNAMICS_API_CONTACT_DETAILS_BASE_URL=http://localhost:3001/dynamics/api/data/v9.2
+```
+
+Example:
+
+```bash
+curl "http://localhost:3001/dynamics/api/data/v9.2/contacts(00000000-0000-0000-0000-000000000001)?\$select=fullname"
 ```
 
 ## Development helpers
