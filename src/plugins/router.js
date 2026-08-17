@@ -3,6 +3,7 @@ import { example } from '#/routes/example.js'
 import { arcgis } from '#/arcgis/api/index.js'
 import { policies } from '#/policies/api/index.js'
 import { addressLookup } from '#/address-lookup/api/index.js'
+import { oauth } from '#/oauth/api/index.js'
 
 export const router = {
   plugin: {
@@ -14,6 +15,7 @@ export const router = {
           .concat(arcgis)
           .concat(policies)
           .concat(addressLookup)
+          .concat(oauth)
       )
     }
   }

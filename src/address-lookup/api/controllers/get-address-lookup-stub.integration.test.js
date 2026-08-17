@@ -1,16 +1,34 @@
 describe('GET Address Lookup Stub Endpoint', () => {
   let server
+  let accessToken
 
-  const lookup = (postcode) =>
+  const mintToken = async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/oauth2/v2.0/token',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      payload: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: 'local-stub-client-id',
+        client_secret: 'local-stub-client-secret'
+      }).toString()
+    })
+
+    return JSON.parse(response.payload).access_token
+  }
+
+  const lookup = (postcode, headers = {}) =>
     server.inject({
       method: 'GET',
-      url: `/api/address-lookup/v2.1/addresses?postcode=${encodeURIComponent(postcode)}`
+      url: `/api/address-lookup/v2.1/addresses?postcode=${encodeURIComponent(postcode)}`,
+      headers: { authorization: `Bearer ${accessToken}`, ...headers }
     })
 
   beforeAll(async () => {
     const { createServer } = await import('#/server.js')
     server = await createServer()
     await server.initialize()
+    accessToken = await mintToken()
   })
 
   afterAll(async () => {
@@ -81,10 +99,39 @@ describe('GET Address Lookup Stub Endpoint', () => {
   test('returns zero results when no postcode is supplied', async () => {
     const response = await server.inject({
       method: 'GET',
-      url: '/api/address-lookup/v2.1/addresses'
+      url: '/api/address-lookup/v2.1/addresses',
+      headers: { authorization: `Bearer ${accessToken}` }
     })
 
     expect(response.statusCode).toBe(200)
     expect(JSON.parse(response.payload).results).toEqual([])
+  })
+
+  test('returns 204 No Content for the reserved no-content postcode', async () => {
+    const response = await lookup('NE99 1NC')
+
+    expect(response.statusCode).toBe(204)
+    expect(response.payload).toBe('')
+  })
+
+  describe('authorization', () => {
+    test('rejects a request with no Authorization header', async () => {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/api/address-lookup/v2.1/addresses?postcode=NE4%207AR'
+      })
+
+      expect(response.statusCode).toBe(401)
+    })
+
+    test.each([
+      ['a non-Bearer scheme', 'Basic abc123'],
+      ['an empty Bearer token', 'Bearer '],
+      ['an unrecognised token', 'Bearer not-a-real-token']
+    ])('rejects %s with 401', async (_description, authorization) => {
+      const response = await lookup('NE4 7AR', { authorization })
+
+      expect(response.statusCode).toBe(401)
+    })
   })
 })

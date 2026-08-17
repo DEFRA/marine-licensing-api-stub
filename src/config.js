@@ -87,6 +87,14 @@ export const config = convict({
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
     }
+  },
+  oauthStub: {
+    tokenTtlSeconds: {
+      doc: 'Lifetime of tokens issued by the OAuth stub, in seconds. Set low to exercise token refresh.',
+      format: 'nat',
+      default: 3600,
+      env: 'OAUTH_STUB_TOKEN_TTL_SECONDS'
+    }
   }
 })
 

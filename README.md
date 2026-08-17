@@ -118,6 +118,9 @@ git config --global core.autocrlf false
 | `GET: /health`                                                     | Health                                        |
 | `POST: /ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/<any>` | ArcGIS stub response (accepts any query/body) |
 | `GET: /explore-marine-plans/api/policies`                          | GOV.UK policies API stub (5 policies)         |
+| `POST: /oauth2/v2.0/token`                                         | OAuth client credentials token stub           |
+| `POST: /<tenantId>/oauth2/v2.0/token`                              | Same, on the tenant-prefixed real path        |
+| `GET: /api/address-lookup/v2.1/addresses`                          | DEFRA address lookup stub (requires Bearer)   |
 | `GET: /example    `                                                | Example API (remove as needed)                |
 | `GET: /example/<id>`                                               | Example API (remove as needed)                |
 
@@ -175,6 +178,57 @@ Example:
 
 ```bash
 curl "http://localhost:3001/explore-marine-plans/api/policies"
+```
+
+### OAuth token stub endpoint
+
+Drop-in replacement for `MARINE_LICENSING_ADDRESS_LOOKUP_OAUTH_TOKEN_URL`
+(`https://login.microsoftonline.com/<tenantId>/oauth2/v2.0/token`), so the frontend's
+real client-credentials flow can be exercised locally.
+
+- Route index: `src/oauth/api/index.js`
+- Controller: `src/oauth/api/controllers/post-oauth-token-stub.js`
+- Token store: `src/oauth/token-store.js`
+
+Behaviour:
+
+- Accepts form-encoded `POST` at `/oauth2/v2.0/token` and `/<tenantId>/oauth2/v2.0/token`
+- Requires `grant_type=client_credentials` plus a non-empty `client_id` and `client_secret`
+  (any values are accepted — this stands in for the gateway's checks, it does not verify them);
+  anything else returns `400 {"error":"invalid_request"}`
+- Returns `{ token_type, expires_in, access_token }`; tokens are held in a bounded in-memory
+  store and are the only ones the address lookup endpoint accepts
+- `OAUTH_STUB_TOKEN_TTL_SECONDS` (default `3600`) controls the token lifetime. Set it low to
+  drive the consumer's token refresh and 401-retry paths.
+
+### Address lookup stub endpoint
+
+Drop-in replacement for `MARINE_LICENSING_ADDRESS_LOOKUP_API_URL`
+(`https://dev-api-gateway.azure.defra.cloud/api/address-lookup/v2.1/addresses`).
+
+- Route index: `src/address-lookup/api/index.js`
+- Controller: `src/address-lookup/api/controllers/get-address-lookup-stub.js`
+- Address data: `src/address-lookup/data/addresses.json`
+
+Behaviour:
+
+- `GET /api/address-lookup/v2.1/addresses?postcode=<postcode>`
+- **Requires `Authorization: Bearer <token>`** from the OAuth token stub above; missing,
+  malformed, unknown or expired tokens get `401`
+- Postcodes are matched case- and whitespace-insensitively
+- `NE4 7AR` returns 1 address, `NE1 1EE` returns 3, `NE99 1NC` returns `204 No Content`,
+  anything else returns `200` with `results: []`
+- Response shape matches the live API (`header` / `results` / `_info`)
+
+Example:
+
+```bash
+TOKEN=$(curl -s -X POST "http://localhost:3001/oauth2/v2.0/token" \
+  -d 'grant_type=client_credentials&client_id=local-stub-client-id&client_secret=local-stub-client-secret' \
+  | jq -r .access_token)
+
+curl "http://localhost:3001/api/address-lookup/v2.1/addresses?postcode=NE4%207AR" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ## Development helpers
