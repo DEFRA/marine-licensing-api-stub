@@ -52,7 +52,11 @@ describe('GET Address Lookup Stub Endpoint', () => {
       })
     )
     expect(payload._info).toEqual(
-      expect.objectContaining({ service: 'Address Lookup v2', method: 'GET' })
+      expect.objectContaining({
+        service: 'Address Lookup v2',
+        method: 'GET',
+        url: '/api/address-lookup/v2.1/addresses'
+      })
     )
     expect(payload.results).toHaveLength(1)
     expect(payload.results[0]).toEqual(
@@ -96,6 +100,17 @@ describe('GET Address Lookup Stub Endpoint', () => {
     expect(payload.header.totalResults).toBe('0')
   })
 
+  test('uses the first value when the postcode is supplied more than once', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/api/address-lookup/v2.1/addresses?postcode=NE4%207AR&postcode=NE1%201EE',
+      headers: { authorization: `Bearer ${accessToken}` }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(JSON.parse(response.payload).results).toHaveLength(1)
+  })
+
   test('returns zero results when no postcode is supplied', async () => {
     const response = await server.inject({
       method: 'GET',
@@ -127,11 +142,24 @@ describe('GET Address Lookup Stub Endpoint', () => {
     test.each([
       ['a non-Bearer scheme', 'Basic abc123'],
       ['an empty Bearer token', 'Bearer '],
-      ['an unrecognised token', 'Bearer not-a-real-token']
+      ['an unrecognised token', 'Bearer not-a-real-token'],
+      ['a token whose expiry has passed', 'Bearer 1.abc123']
     ])('rejects %s with 401', async (_description, authorization) => {
       const response = await lookup('NE4 7AR', { authorization })
 
       expect(response.statusCode).toBe(401)
     })
+
+    // The auth-scheme is case-insensitive per RFC 7235
+    test.each(['bearer', 'BEARER', 'BeArEr'])(
+      'accepts the "%s" scheme spelling',
+      async (scheme) => {
+        const response = await lookup('NE4 7AR', {
+          authorization: `${scheme} ${accessToken}`
+        })
+
+        expect(response.statusCode).toBe(200)
+      }
+    )
   })
 })

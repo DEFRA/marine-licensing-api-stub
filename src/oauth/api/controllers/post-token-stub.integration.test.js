@@ -36,15 +36,37 @@ describe('POST OAuth Token Stub Endpoint', () => {
 
     expect(payload.token_type).toBe('Bearer')
     expect(payload.expires_in).toBeGreaterThan(0)
+    // Real Entra ID returns ext_expires_in alongside expires_in
+    expect(payload.ext_expires_in).toBe(payload.expires_in)
     expect(payload.access_token).toEqual(expect.any(String))
     expect(payload.access_token.length).toBeGreaterThan(0)
   })
 
-  test('accepts the tenant-prefixed path used by the real token endpoint', async () => {
-    const response = await requestToken(
-      validPayload,
+  test.each([
+    [
+      'the tenant-prefixed path used by the real token endpoint',
       '/9fb17f24-fe6d-4c1e-9a7f-1f9c9a4a2b3d/oauth2/v2.0/token'
+    ],
+    ['the path Dynamics is pointed at', '/dynamics/oauth2/v2.0/token']
+  ])('serves %s from the same controller', async (_description, url) => {
+    const response = await requestToken(validPayload, url)
+
+    expect(response.statusCode).toBe(200)
+    expect(JSON.parse(response.payload)).toEqual(
+      expect.objectContaining({
+        token_type: 'Bearer',
+        access_token: expect.any(String)
+      })
     )
+  })
+
+  test('accepts a JSON body as well as form encoding', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/oauth2/v2.0/token',
+      headers: { 'content-type': 'application/json' },
+      payload: validPayload
+    })
 
     expect(response.statusCode).toBe(200)
     expect(JSON.parse(response.payload).access_token).toEqual(
