@@ -23,11 +23,9 @@ export const postTokenStubController = {
     payload: {
       parse: true,
       output: 'data',
-      allow: [
-        'application/x-www-form-urlencoded',
-        'application/json',
-        'text/plain'
-      ]
+      // text/plain is deliberately not allowed: hapi would hand the body through as a
+      // string, so the credential check below could never pass
+      allow: ['application/x-www-form-urlencoded', 'application/json']
     }
   },
   handler: async (request, h) => {

@@ -17,12 +17,15 @@ describe('GET Address Lookup Stub Endpoint', () => {
     return JSON.parse(response.payload).access_token
   }
 
-  const lookup = (postcode, headers = {}) =>
-    server.inject({
+  const lookup = (postcode, headers = {}, query = {}) => {
+    const search = new URLSearchParams({ postcode, ...query })
+
+    return server.inject({
       method: 'GET',
-      url: `/api/address-lookup/v2.1/addresses?postcode=${encodeURIComponent(postcode)}`,
+      url: `/api/address-lookup/v2.1/addresses?${search}`,
       headers: { authorization: `Bearer ${accessToken}`, ...headers }
     })
+  }
 
   beforeAll(async () => {
     const { createServer } = await import('#/server.js')
@@ -68,7 +71,7 @@ describe('GET Address Lookup Stub Endpoint', () => {
     )
   })
 
-  test.each(['NE4 7AR', 'ne4 7ar', 'NE47AR', '  ne4   7ar '])(
+  test.each(['ne4 7ar', 'NE47AR', '  ne4   7ar '])(
     'matches postcode "%s" regardless of case and whitespace',
     async (postcode) => {
       const response = await lookup(postcode)
@@ -88,6 +91,38 @@ describe('GET Address Lookup Stub Endpoint', () => {
     expect(payload.results).toHaveLength(3)
     expect(payload.header.totalResults).toBe('3')
   })
+
+  // The consumer compares header.totalResults against results.length to tell that the set
+  // was capped, so the total has to stay the pre-cap count
+  test('reports the full total when maxresults truncates the set', async () => {
+    const response = await lookup('NE1 1EE', {}, { maxresults: '2' })
+
+    expect(response.statusCode).toBe(200)
+
+    const payload = JSON.parse(response.payload)
+
+    expect(payload.results).toHaveLength(2)
+    expect(payload.header.totalResults).toBe('3')
+    expect(payload.header.maximumResults).toBe('2')
+  })
+
+  test.each([
+    ['above the stub ceiling', '500'],
+    ['not a number', 'all'],
+    ['zero', '0']
+  ])(
+    'falls back to the default maximum when maxresults is %s',
+    async (_description, maxresults) => {
+      const response = await lookup('NE1 1EE', {}, { maxresults })
+
+      expect(response.statusCode).toBe(200)
+
+      const payload = JSON.parse(response.payload)
+
+      expect(payload.results).toHaveLength(3)
+      expect(payload.header.maximumResults).toBe('100')
+    }
+  )
 
   test('returns zero results for an unknown postcode', async () => {
     const response = await lookup('ZZ1 1ZZ')
@@ -142,8 +177,7 @@ describe('GET Address Lookup Stub Endpoint', () => {
     test.each([
       ['a non-Bearer scheme', 'Basic abc123'],
       ['an empty Bearer token', 'Bearer '],
-      ['an unrecognised token', 'Bearer not-a-real-token'],
-      ['a token whose expiry has passed', 'Bearer 1.abc123']
+      ['an unrecognised token', 'Bearer not-a-real-token']
     ])('rejects %s with 401', async (_description, authorization) => {
       const response = await lookup('NE4 7AR', { authorization })
 

@@ -24,8 +24,10 @@ describe('#token', () => {
     vi.useFakeTimers()
     config.set('oauthStub.tokenTtlSeconds', 5)
 
-    const { accessToken } = mintToken()
+    const { accessToken, expiresIn } = mintToken()
 
+    // The consumer caches on expires_in, so the advertised lifetime has to track the config
+    expect(expiresIn).toBe(5)
     expect(isTokenValid(accessToken)).toBe(true)
 
     vi.advanceTimersByTime(5001)

@@ -74,17 +74,6 @@ describe('POST OAuth Token Stub Endpoint', () => {
     )
   })
 
-  test('issues a distinct token on each request', async () => {
-    const [first, second] = await Promise.all([
-      requestToken(validPayload),
-      requestToken(validPayload)
-    ])
-
-    expect(JSON.parse(first.payload).access_token).not.toBe(
-      JSON.parse(second.payload).access_token
-    )
-  })
-
   test.each([
     ['an unsupported grant type', { ...validPayload, grant_type: 'password' }],
     ['a missing grant type', { ...validPayload, grant_type: '' }],

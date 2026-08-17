@@ -204,7 +204,7 @@ One client-credentials token stub, serving every OAuth token URL the services ar
 
 Behaviour:
 
-- Accepts `POST` as form-encoded, JSON or `text/plain`
+- Accepts `POST` as form-encoded or JSON
 - Requires `grant_type=client_credentials` plus a non-empty `client_id` and `client_secret`
   (any values are accepted — this stands in for the gateway's checks, it does not verify them);
   anything else returns `400 {"error":"invalid_request"}`. The client secret is never logged.
@@ -234,6 +234,10 @@ Behaviour:
 - Postcodes are matched case- and whitespace-insensitively
 - `NE4 7AR` returns 1 address, `NE1 1EE` returns 3, `NE99 1NC` returns `204 No Content`,
   anything else returns `200` with `results: []`
+- `?maxresults=<n>` caps the returned set (default and ceiling 100; anything unusable falls back
+  to the ceiling). `header.totalResults` stays the **pre-cap** count, which is how the consumer
+  detects a truncated set — `?postcode=NE1%201EE&maxresults=2` returns 2 results with
+  `totalResults: "3"`.
 - Response shape matches the live API (`header` / `results` / `_info`)
 
 Example:

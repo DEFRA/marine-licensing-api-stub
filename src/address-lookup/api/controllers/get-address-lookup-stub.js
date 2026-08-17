@@ -22,6 +22,18 @@ const normalisePostcode = (postcode) =>
 // letting it blow up on toUpperCase
 const firstQueryValue = (value) => (Array.isArray(value) ? value[0] : value)
 
+// Callers send ?maxresults= to cap the set they get back. Anything unusable falls back to
+// the stub's own ceiling rather than erroring, which is what the real API does.
+const parseMaximumResults = (value) => {
+  const requested = Number(firstQueryValue(value))
+
+  if (!Number.isInteger(requested) || requested < 1) {
+    return MAXIMUM_RESULTS
+  }
+
+  return Math.min(requested, MAXIMUM_RESULTS)
+}
+
 // The auth-scheme is case-insensitive per RFC 7235, and the real gateway treats it that way
 const extractBearerToken = (authorizationHeader) => {
   if (
@@ -34,16 +46,23 @@ const extractBearerToken = (authorizationHeader) => {
   return authorizationHeader.slice(BEARER_PREFIX.length).trim() || null
 }
 
-const buildResponse = (request, postcode, results) => ({
+// totalResults is how many the postcode has, not how many are being returned. Consumers
+// compare the two to tell that a set was capped, so it must be the pre-cap count.
+const buildResponse = (
+  request,
+  postcode,
+  results,
+  { totalResults, maximumResults }
+) => ({
   header: {
     query: `postcode=${postcode}`,
     offset: '0',
-    totalResults: String(results.length),
+    totalResults: String(totalResults),
     format: 'JSON',
     dataset: 'DPA',
     language: 'EN',
-    maximumResults: String(MAXIMUM_RESULTS),
-    matchingTotalResults: String(results.length)
+    maximumResults: String(maximumResults),
+    matchingTotalResults: String(totalResults)
   },
   results,
   _info: {
@@ -102,10 +121,9 @@ export const getAddressLookupStubController = {
         return h.response().code(HTTP_STATUS_NO_CONTENT)
       }
 
-      const results = (addresses[normalisedPostcode] ?? []).slice(
-        0,
-        MAXIMUM_RESULTS
-      )
+      const matches = addresses[normalisedPostcode] ?? []
+      const maximumResults = parseMaximumResults(request.query.maxresults)
+      const results = matches.slice(0, maximumResults)
 
       request.logger.info(
         {
@@ -119,13 +137,19 @@ export const getAddressLookupStubController = {
             path: request.path
           },
           addressLookup: {
-            resultCount: results.length
+            resultCount: results.length,
+            totalResults: matches.length
           }
         },
         'Address lookup stub request received'
       )
 
-      return h.response(buildResponse(request, postcode, results))
+      return h.response(
+        buildResponse(request, postcode, results, {
+          totalResults: matches.length,
+          maximumResults
+        })
+      )
     } catch (error) {
       request.logger.error(
         structureErrorForECS(error),
