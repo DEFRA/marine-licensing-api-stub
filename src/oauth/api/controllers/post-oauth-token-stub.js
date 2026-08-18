@@ -13,11 +13,10 @@ const isValidTokenRequest = (payload) =>
   Boolean(payload.client_id) &&
   Boolean(payload.client_secret)
 
-// Serves every OAuth token URL the services are pointed at: the address lookup gateway's
-// (`/oauth2/v2.0/token`, with and without the real tenant prefix) and Dynamics'
-// (`/dynamics/oauth2/v2.0/token`). Both are Entra client-credentials flows, so one stub covers
-// them; only the address lookup stub validates the token it is later sent.
-export const postTokenStubController = {
+// Serves the address lookup gateway's token URL (`/oauth2/v2.0/token`, with and without the
+// real tenant prefix). Dynamics has its own token stub at src/dynamics/ — deliberately left
+// alone, since it is already merged and used by another team.
+export const postOauthTokenStubController = {
   options: {
     auth: false,
     payload: {
@@ -75,7 +74,7 @@ export const postTokenStubController = {
       return h.response({
         token_type: 'Bearer',
         expires_in: expiresIn,
-        // Real Entra ID returns both; the Dynamics stub this replaced did too
+        // Real Entra ID returns both
         ext_expires_in: expiresIn,
         access_token: accessToken
       })

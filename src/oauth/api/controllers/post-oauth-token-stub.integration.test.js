@@ -42,14 +42,11 @@ describe('POST OAuth Token Stub Endpoint', () => {
     expect(payload.access_token.length).toBeGreaterThan(0)
   })
 
-  test.each([
-    [
-      'the tenant-prefixed path used by the real token endpoint',
+  test('serves the tenant-prefixed path used by the real token endpoint', async () => {
+    const response = await requestToken(
+      validPayload,
       '/9fb17f24-fe6d-4c1e-9a7f-1f9c9a4a2b3d/oauth2/v2.0/token'
-    ],
-    ['the path Dynamics is pointed at', '/dynamics/oauth2/v2.0/token']
-  ])('serves %s from the same controller', async (_description, url) => {
-    const response = await requestToken(validPayload, url)
+    )
 
     expect(response.statusCode).toBe(200)
     expect(JSON.parse(response.payload)).toEqual(

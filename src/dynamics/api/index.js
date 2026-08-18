@@ -1,4 +1,4 @@
-import { postTokenStubController } from '#/oauth/api/controllers/post-token-stub.js'
+import { postTokenStubController } from './controllers/post-token-stub.js'
 import { getContactsStubController } from './controllers/get-contacts-stub.js'
 import { postSubmissionStubController } from './controllers/post-submission-stub.js'
 
@@ -12,7 +12,6 @@ import { postSubmissionStubController } from './controllers/post-submission-stub
 //   DYNAMICS_MARINE_LICENCE_API_URL        -> /dynamics/flows/marine-licences
 export const dynamics = [
   {
-    // Shared with the address lookup token stub — see src/oauth/api/index.js
     method: 'POST',
     path: '/dynamics/oauth2/v2.0/token',
     ...postTokenStubController

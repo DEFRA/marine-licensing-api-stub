@@ -118,10 +118,10 @@ git config --global core.autocrlf false
 | `GET: /health`                                                     | Health                                        |
 | `POST: /ArcGIS/rest/services/PolicyData_MDP/FeatureServer/0/<any>` | ArcGIS stub response (accepts any query/body) |
 | `GET: /explore-marine-plans/api/policies`                          | GOV.UK policies API stub (5 policies)         |
-| `POST: /oauth2/v2.0/token`                                         | OAuth client credentials token stub           |
+| `POST: /oauth2/v2.0/token`                                         | Address lookup OAuth token stub               |
 | `POST: /<tenantId>/oauth2/v2.0/token`                              | Same, on the tenant-prefixed real path        |
-| `POST: /dynamics/oauth2/v2.0/token`                                | Same, on the path Dynamics is pointed at      |
 | `GET: /api/address-lookup/v2.1/addresses`                          | DEFRA address lookup stub (requires Bearer)   |
+| `POST: /dynamics/oauth2/v2.0/token`                                | Dynamics token stub                           |
 | `GET: /dynamics/api/data/v9.2/contacts(<guid>)`                    | Dynamics single contact stub                  |
 | `GET: /dynamics/api/data/v9.2/contacts`                            | Dynamics contacts collection stub (`$filter`) |
 | `POST: /dynamics/flows/exemptions`                                 | Dynamics exemption submission stub (202)      |
@@ -189,18 +189,20 @@ curl "http://localhost:3001/explore-marine-plans/api/policies"
 
 ### OAuth token stub endpoint
 
-One client-credentials token stub, serving every OAuth token URL the services are pointed at:
+The client-credentials token stub for the address lookup gateway:
 
 | Env var                                           | Path                            |
 | :------------------------------------------------ | :------------------------------ |
 | `MARINE_LICENSING_ADDRESS_LOOKUP_OAUTH_TOKEN_URL` | `/oauth2/v2.0/token`            |
 | — same, mirroring the real tenant-prefixed URL    | `/<tenantId>/oauth2/v2.0/token` |
-| `DYNAMICS_TOKEN_URL`                              | `/dynamics/oauth2/v2.0/token`   |
 
-- Controller: `src/oauth/api/controllers/post-token-stub.js`
+- Controller: `src/oauth/api/controllers/post-oauth-token-stub.js`
 - Token minting: `src/oauth/token.js`
-- Route indexes: `src/oauth/api/index.js` (the two Entra paths) and `src/dynamics/api/index.js`
-  (the Dynamics path, so each integration's index stays a complete manifest of its own URLs)
+- Route index: `src/oauth/api/index.js`
+
+Dynamics has its own token stub on `/dynamics/oauth2/v2.0/token`
+(`src/dynamics/api/controllers/post-token-stub.js`) — see the Dynamics sections below. The two are
+deliberately kept separate.
 
 Behaviour:
 
@@ -214,8 +216,7 @@ Behaviour:
   a security boundary.
 - `OAUTH_STUB_TOKEN_TTL_SECONDS` (default `3600`) controls the token lifetime. Set it low to
   drive the consumer's token refresh and 401-retry paths.
-- Only the address lookup endpoint checks the token it is sent; the Dynamics contact and flow
-  stubs accept any request, as the real integration's behaviour there is not worth reproducing.
+- The address lookup endpoint checks the token it is sent; nothing else does.
 
 ### Address lookup stub endpoint
 
@@ -267,9 +268,9 @@ lookup are stubbed.
 
 Behaviour:
 
-- `POST /dynamics/oauth2/v2.0/token` issues an access token — see
-  [OAuth token stub endpoint](#oauth-token-stub-endpoint). The contact and flow routes below
-  do not check it.
+- `POST /dynamics/oauth2/v2.0/token` issues a fixed access token
+  (`src/dynamics/api/controllers/post-token-stub.js`). The contact and flow routes below do not
+  check it.
 - `GET /dynamics/api/data/v9.2/contacts(<guid>)` returns a single contact entity with
   `fullname` (plus `firstname`, `lastname`, `emailaddress1`). `$select` is ignored.
 - `GET /dynamics/api/data/v9.2/contacts?$filter=contactid eq '<guid>' or ...` returns an
