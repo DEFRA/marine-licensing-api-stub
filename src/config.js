@@ -90,8 +90,14 @@ export const config = convict({
   },
   oauthStub: {
     tokenTtlSeconds: {
-      doc: 'Lifetime of tokens issued by the OAuth stub, in seconds. Set low to exercise token refresh.',
-      format: 'nat',
+      doc: 'Lifetime of tokens issued by the OAuth stub, in seconds. Set low (but at least 1) to exercise token refresh.',
+      // Not 'nat': that allows 0, which mints already-expired tokens and turns every
+      // downstream call into an unexplained 401
+      format: (value) => {
+        if (!Number.isInteger(value) || value < 1) {
+          throw new Error('must be an integer of at least 1 second')
+        }
+      },
       default: 3600,
       env: 'OAUTH_STUB_TOKEN_TTL_SECONDS'
     }

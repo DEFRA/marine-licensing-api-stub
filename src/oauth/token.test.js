@@ -1,18 +1,24 @@
 import { config } from '#/config.js'
 import { mintToken, isTokenValid } from '#/oauth/token.js'
 
-const DEFAULT_TTL_SECONDS = 3600
-
 describe('#token', () => {
+  // Captured rather than hardcoded: OAUTH_STUB_TOKEN_TTL_SECONDS may be set locally, and
+  // config is a process-wide singleton, so restoring the wrong value leaks into other suites
+  let configuredTtlSeconds
+
+  beforeAll(() => {
+    configuredTtlSeconds = config.get('oauthStub.tokenTtlSeconds')
+  })
+
   afterEach(() => {
     vi.useRealTimers()
-    config.set('oauthStub.tokenTtlSeconds', DEFAULT_TTL_SECONDS)
+    config.set('oauthStub.tokenTtlSeconds', configuredTtlSeconds)
   })
 
   test('a freshly minted token is valid', () => {
     const { accessToken, expiresIn } = mintToken()
 
-    expect(expiresIn).toBe(DEFAULT_TTL_SECONDS)
+    expect(expiresIn).toBe(configuredTtlSeconds)
     expect(isTokenValid(accessToken)).toBe(true)
   })
 

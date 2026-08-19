@@ -1,8 +1,11 @@
 describe('GET Address Lookup Stub Endpoint', () => {
   let server
   let accessToken
+  let configuredTtlSeconds
 
-  const mintToken = async () => {
+  const SUITE_TTL_SECONDS = 3600
+
+  const requestAccessToken = async () => {
     const response = await server.inject({
       method: 'POST',
       url: '/oauth2/v2.0/token',
@@ -28,13 +31,23 @@ describe('GET Address Lookup Stub Endpoint', () => {
   }
 
   beforeAll(async () => {
+    const { config } = await import('#/config.js')
     const { createServer } = await import('#/server.js')
+
+    // One token is minted here and reused throughout, so pin the lifetime for the suite —
+    // a low OAUTH_STUB_TOKEN_TTL_SECONDS locally would otherwise expire it part-way through
+    configuredTtlSeconds = config.get('oauthStub.tokenTtlSeconds')
+    config.set('oauthStub.tokenTtlSeconds', SUITE_TTL_SECONDS)
+
     server = await createServer()
     await server.initialize()
-    accessToken = await mintToken()
+    accessToken = await requestAccessToken()
   })
 
   afterAll(async () => {
+    const { config } = await import('#/config.js')
+    config.set('oauthStub.tokenTtlSeconds', configuredTtlSeconds)
+
     await server?.stop({ timeout: 1000 })
   })
 
@@ -111,7 +124,7 @@ describe('GET Address Lookup Stub Endpoint', () => {
     ['not a number', 'all'],
     ['zero', '0']
   ])(
-    'falls back to the default maximum when maxresults is %s',
+    'caps maxresults at the stub ceiling when it is %s',
     async (_description, maxresults) => {
       const response = await lookup('NE1 1EE', {}, { maxresults })
 

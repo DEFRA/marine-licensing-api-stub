@@ -191,10 +191,10 @@ curl "http://localhost:3001/explore-marine-plans/api/policies"
 
 The client-credentials token stub for the address lookup gateway:
 
-| Env var                                           | Path                            |
-| :------------------------------------------------ | :------------------------------ |
-| `MARINE_LICENSING_ADDRESS_LOOKUP_OAUTH_TOKEN_URL` | `/oauth2/v2.0/token`            |
-| — same, mirroring the real tenant-prefixed URL    | `/<tenantId>/oauth2/v2.0/token` |
+| Env var                                           | Path                            | Notes                                |
+| :------------------------------------------------ | :------------------------------ | :----------------------------------- |
+| `MARINE_LICENSING_ADDRESS_LOOKUP_OAUTH_TOKEN_URL` | `/oauth2/v2.0/token`            | Short form                           |
+| `MARINE_LICENSING_ADDRESS_LOOKUP_OAUTH_TOKEN_URL` | `/<tenantId>/oauth2/v2.0/token` | Mirrors the real tenant-prefixed URL |
 
 - Controller: `src/oauth/api/controllers/post-oauth-token-stub.js`
 - Token minting: `src/oauth/token.js`
@@ -214,8 +214,9 @@ Behaviour:
 - The token's expiry is **encoded in the token itself** rather than stored, so there is no
   server-side state to grow or evict. Tokens are forgeable by design — this is a dev stub, not
   a security boundary.
-- `OAUTH_STUB_TOKEN_TTL_SECONDS` (default `3600`) controls the token lifetime. Set it low to
-  drive the consumer's token refresh and 401-retry paths.
+- `OAUTH_STUB_TOKEN_TTL_SECONDS` (default `3600`, minimum `1`) controls the token lifetime.
+  Set it low to drive the consumer's token refresh and 401-retry paths; `0` is rejected at
+  startup, since it would mint tokens that are already expired.
 - The address lookup endpoint checks the token it is sent; nothing else does.
 
 ### Address lookup stub endpoint
@@ -235,8 +236,8 @@ Behaviour:
 - Postcodes are matched case- and whitespace-insensitively
 - `NE4 7AR` returns 1 address, `NE1 1EE` returns 3, `NE99 1NC` returns `204 No Content`,
   anything else returns `200` with `results: []`
-- `?maxresults=<n>` caps the returned set (default and ceiling 100; anything unusable falls back
-  to the ceiling). `header.totalResults` stays the **pre-cap** count, which is how the consumer
+- `?maxresults=<n>` caps the returned set (default and ceiling 100; a fraction is truncated,
+  and anything else unusable falls back to the ceiling). `header.totalResults` stays the **pre-cap** count, which is how the consumer
   detects a truncated set — `?postcode=NE1%201EE&maxresults=2` returns 2 results with
   `totalResults: "3"`.
 - Response shape matches the live API (`header` / `results` / `_info`)
@@ -260,9 +261,10 @@ credentials or network access locally, so both the OAuth token call and the cont
 lookup are stubbed.
 
 - Route index: `src/dynamics/api/index.js`
-- Controller: `src/dynamics/api/controllers/get-contacts-stub.js` (it serves both contact
-  routes, branching on whether a contact id was given in the path). The token route is served
-  by the shared controller — see [OAuth token stub endpoint](#oauth-token-stub-endpoint).
+- Controllers: `src/dynamics/api/controllers/{post-token-stub,get-contacts-stub}.js`
+  (`get-contacts-stub.js` serves both contact routes, branching on whether a contact id
+  was given in the path). The Dynamics token stub is separate from the address lookup one —
+  see [OAuth token stub endpoint](#oauth-token-stub-endpoint).
 - Shared contact resolution: `src/dynamics/helpers/resolve-contact.js`
 - Contact data: `src/dynamics/data/contacts.json`
 

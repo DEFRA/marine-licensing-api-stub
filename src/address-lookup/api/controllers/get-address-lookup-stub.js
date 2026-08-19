@@ -9,7 +9,9 @@ const addresses = require('../../data/addresses.json')
 
 const MAXIMUM_RESULTS = 100
 const HTTP_STATUS_NO_CONTENT = 204
-const BEARER_PREFIX = 'Bearer '
+
+// The auth-scheme is case-insensitive per RFC 7235, and the real gateway treats it that way
+const BEARER_PATTERN = /^bearer\s+(\S.*)$/i
 
 // Reserved postcode that makes the stub answer 204 No Content, so the frontend's
 // no-content branch is reachable end to end.
@@ -22,10 +24,11 @@ const normalisePostcode = (postcode) =>
 // letting it blow up on toUpperCase
 const firstQueryValue = (value) => (Array.isArray(value) ? value[0] : value)
 
-// Callers send ?maxresults= to cap the set they get back. Anything unusable falls back to
-// the stub's own ceiling rather than erroring, which is what the real API does.
+// Callers send ?maxresults= to cap the set they get back. A fraction is truncated rather
+// than rejected, and anything else unusable falls back to the stub's own ceiling rather
+// than erroring, which is what the real API does.
 const parseMaximumResults = (value) => {
-  const requested = Number(firstQueryValue(value))
+  const requested = Math.floor(Number(firstQueryValue(value)))
 
   if (!Number.isInteger(requested) || requested < 1) {
     return MAXIMUM_RESULTS
@@ -34,22 +37,13 @@ const parseMaximumResults = (value) => {
   return Math.min(requested, MAXIMUM_RESULTS)
 }
 
-// The auth-scheme is case-insensitive per RFC 7235, and the real gateway treats it that way
-const extractBearerToken = (authorizationHeader) => {
-  if (
-    authorizationHeader.slice(0, BEARER_PREFIX.length).toLowerCase() !==
-    BEARER_PREFIX.toLowerCase()
-  ) {
-    return null
-  }
-
-  return authorizationHeader.slice(BEARER_PREFIX.length).trim() || null
-}
+const extractBearerToken = (authorizationHeader) =>
+  BEARER_PATTERN.exec(authorizationHeader)?.[1].trim() ?? null
 
 // totalResults is how many the postcode has, not how many are being returned. Consumers
 // compare the two to tell that a set was capped, so it must be the pre-cap count.
 const buildResponse = (
-  request,
+  path,
   postcode,
   results,
   { totalResults, maximumResults }
@@ -70,7 +64,7 @@ const buildResponse = (
     dateTime: new Date().toISOString(),
     method: 'GET',
     service: 'Address Lookup v2',
-    url: request.path,
+    url: path,
     nodeID: 'atom01',
     atomID: randomUUID()
   }
@@ -81,6 +75,8 @@ export const getAddressLookupStubController = {
     auth: false
   },
   handler: async (request, h) => {
+    // Deliberately outside the try below: the 401 must reach the client as a 401, not be
+    // swallowed by the catch and re-thrown as a 500
     const token = extractBearerToken(request.headers.authorization ?? '')
 
     if (!token || !isTokenValid(token)) {
@@ -145,7 +141,7 @@ export const getAddressLookupStubController = {
       )
 
       return h.response(
-        buildResponse(request, postcode, results, {
+        buildResponse(request.path, postcode, results, {
           totalResults: matches.length,
           maximumResults
         })
