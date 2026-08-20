@@ -65,8 +65,7 @@ export const postOauthTokenStubController = {
             type: 'access',
             outcome: 'success'
           },
-          url: { path: request.path },
-          oauth: { expiresIn }
+          url: { path: request.path }
         },
         `OAuth token stub issued an access token for client ${payload.client_id}`
       )

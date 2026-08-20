@@ -131,10 +131,6 @@ export const getAddressLookupStubController = {
           },
           url: {
             path: request.path
-          },
-          addressLookup: {
-            resultCount: results.length,
-            totalResults: matches.length
           }
         },
         'Address lookup stub request received'
