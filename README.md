@@ -236,6 +236,9 @@ Behaviour:
 - Postcodes are matched case- and whitespace-insensitively
 - `NE4 7AR` returns 1 address, `NE1 1EE` returns 3, `NE99 1NC` returns `204 No Content`,
   anything else returns `200` with `results: []`
+- `NE99 2NC` returns the live API's `400` for a postcode it will not serve, with the
+  reason nested under `error.message` (not a Boom envelope) alongside `_info`. The
+  frontend treats that body as "no addresses found" rather than an outage.
 - `?maxresults=<n>` caps the returned set (default and ceiling 100; a fraction is truncated,
   and anything else unusable falls back to the ceiling). `header.totalResults` stays the **pre-cap** count, which is how the consumer
   detects a truncated set — `?postcode=NE1%201EE&maxresults=2` returns 2 results with

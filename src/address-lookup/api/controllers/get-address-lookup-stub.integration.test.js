@@ -177,6 +177,17 @@ describe('GET Address Lookup Stub Endpoint', () => {
     expect(response.payload).toBe('')
   })
 
+  test('returns the API 400 for the reserved rejected postcode', async () => {
+    const response = await lookup('NE99 2NC')
+
+    expect(response.statusCode).toBe(400)
+    expect(JSON.parse(response.payload).error).toEqual({
+      statuscode: 400,
+      message:
+        'Requested postcode must contain a minimum of the sector plus 1 digit of the district e.g. SO1. Requested postcode was NE992NC'
+    })
+  })
+
   describe('authorization', () => {
     test('rejects a request with no Authorization header', async () => {
       const response = await server.inject({
