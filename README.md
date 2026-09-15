@@ -157,6 +157,56 @@ The controller also emits basic ECS-friendly logs for:
 - Request received (path/query metadata)
 - Response sent (feature count)
 
+### EMP feature service stub endpoints
+
+Drop-in replacement for `EMP_API_URL` — the Explore Marine Planning ArcGIS
+feature service the backend writes exemptions to. Kept separate from the ArcGIS
+routes above: `PolicyData_MDP` is queried for marine plan policies and answers
+with `features`, while this layer is written to and answers with `addResults` /
+`updateResults`.
+
+- Route index: `src/emp/api/index.js`
+- Controllers: `src/emp/api/controllers/`
+
+Point the backend at the feature-service path — it appends the operation itself:
+
+```
+EMP_API_URL=http://localhost:3001/ArcGIS/rest/services/Exemptions/FeatureServer/0
+EMP_API_KEY=anything
+EMP_ENABLED=true
+```
+
+Behaviour:
+
+- `POST .../addFeatures` returns `{ addResults: [...] }`
+- `POST .../updateFeatures` returns `{ updateResults: [...] }`
+- **One result per feature sent.** The caller maps every result to an object id,
+  and an exemption with several manual-circle sites sends one feature per site,
+  so a single fixed result would silently lose ids.
+- An update echoes back the `OBJECTID` it was given; an add allocates one.
+- The API key is logged as `[redacted]`.
+
+Each request logs its method, path, query, feature count, and the `Status` and
+`CaseReference` of every feature — which is what makes it useful for confirming
+what the backend is actually sending.
+
+#### Forcing failures
+
+Real failures are hard to produce against a working stub, and pointing at an
+unreachable host gives a connection error rather than the API-level failure the
+caller handles differently. So the stub can be told to fail:
+
+```bash
+curl -X PUT http://localhost:3001/emp-stub/fail-mode \
+  -H "content-type: application/json" -d '{"mode":"add"}'
+
+curl http://localhost:3001/emp-stub/fail-mode
+```
+
+Modes are `none`, `add`, `update` and `all`. The default comes from
+`EMP_STUB_FAIL_MODE` and a restart returns to it, so a stub is never left
+mysteriously broken.
+
 ### GOV.UK policies stub endpoint
 
 Drop-in replacement for `GOVUK_MARINE_POLICIES_API_URL` when
