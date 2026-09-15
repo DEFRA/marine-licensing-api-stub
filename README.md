@@ -190,6 +190,16 @@ Each request logs its method, path, query, feature count, and the `Status` and
 `CaseReference` of every feature — which is what makes it useful for confirming
 what the backend is actually sending.
 
+#### Ready-made requests
+
+`bruno/emp-stub.postman_collection.json` is a Postman v2.1 collection covering
+both operations, a multi-site exemption, and the fail-mode controls. Bruno
+imports it with **Import Collection → Postman**; Postman and Insomnia take it
+directly.
+
+Adjust the `empBaseUrl` and `stubHost` collection variables if the stub is not on
+port 3002.
+
 #### Forcing failures
 
 Real failures are hard to produce against a working stub, and pointing at an
