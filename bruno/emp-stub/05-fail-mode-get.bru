@@ -1,0 +1,16 @@
+meta {
+  name: Fail mode - read
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{stubHost}}/emp-stub/fail-mode
+  body: none
+  auth: none
+}
+
+docs {
+  Expect: 200, { "mode": "none" } unless something has changed it. The default
+  comes from EMP_STUB_FAIL_MODE and a container restart returns to it.
+}

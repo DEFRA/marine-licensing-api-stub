@@ -1,0 +1,31 @@
+meta {
+  name: Update - status push (Scheduled to Active)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{empBaseUrl}}/updateFeatures
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  f: json
+  token: {{empApiKey}}
+  rollbackOnFailure: true
+  features: [{"attributes":{"OBJECTID":1000,"Status":"Active"}}]
+}
+
+docs {
+  What the nightly job's status push sends - this is the new behaviour ML-1500
+  adds. Note how little it carries: only the OBJECTID and the new Status. The
+  push deliberately does not resend the whole feature.
+
+  Swap Status for "Expired" or "Withdrawn" to exercise the other transitions.
+  Withdrawn is sent by the existing withdrawal path, unchanged by this ticket.
+
+  Expect: 200, updateResults echoing OBJECTID 1000 back rather than allocating
+  a new id - otherwise the backend's stored feature ids would drift on every
+  update.
+}

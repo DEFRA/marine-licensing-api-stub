@@ -1,0 +1,26 @@
+meta {
+  name: Update - both features of a two-site exemption
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{empBaseUrl}}/updateFeatures
+  body: formUrlEncoded
+  auth: none
+}
+
+body:form-urlencoded {
+  f: json
+  token: {{empApiKey}}
+  rollbackOnFailure: true
+  features: [{"attributes":{"OBJECTID":1000,"Status":"Expired"}},{"attributes":{"OBJECTID":1001,"Status":"Expired"}}]
+}
+
+docs {
+  A status push for the two-feature exemption from request 02. The backend maps
+  over every stored feature id, so an exemption with several sites updates all
+  of them in one call.
+
+  Expect: 200, updateResults with two entries echoing 1000 and 1001.
+}

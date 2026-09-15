@@ -1,0 +1,31 @@
+meta {
+  name: Fail mode - set
+  type: http
+  seq: 6
+}
+
+put {
+  url: {{stubHost}}/emp-stub/fail-mode
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "mode": "update"
+  }
+}
+
+docs {
+  none | add | update | all.
+
+  Set "update" and re-run request 03: updateResults comes back with
+  success: false and an error description, which is an API-level failure rather
+  than the connection error you would get from an unreachable host. The backend
+  handles those two differently, and this is the one its retry and dead-letter
+  path actually exercises.
+
+  Set back to "none" when finished, or the next transition will fail too.
+
+  An unknown mode returns 400 and leaves the current mode alone.
+}
