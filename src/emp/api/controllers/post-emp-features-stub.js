@@ -28,19 +28,38 @@ const parseFeatures = (payload) => {
   }
 }
 
+/**
+ * Collects one attribute across every feature, or nothing when no feature
+ * carries it. An add identifies its features by CaseReference and an update by
+ * OBJECTID, so logging both unconditionally would print a column of nulls on
+ * every request and make a genuinely missing value indistinguishable from one
+ * the operation never sends.
+ */
+const attributeAcross = (features, key) => {
+  const values = features.map((feature) => feature?.attributes?.[key])
+
+  return values.some((value) => value !== undefined && value !== null)
+    ? values
+    : undefined
+}
+
+const withoutUndefined = (object) =>
+  Object.fromEntries(
+    Object.entries(object).filter(([, value]) => value !== undefined)
+  )
+
 // The token is the EMP API key. Never log it.
-const loggablePayload = (payload, features) => {
+export const loggablePayload = (payload, features) => {
   const { token, features: _features, ...rest } = payload ?? {}
 
-  return {
+  return withoutUndefined({
     ...rest,
     token: token ? '[redacted]' : undefined,
     featureCount: features.length,
-    statuses: features.map((feature) => feature?.attributes?.Status),
-    caseReferences: features.map(
-      (feature) => feature?.attributes?.CaseReference
-    )
-  }
+    statuses: attributeAcross(features, 'Status'),
+    caseReferences: attributeAcross(features, 'CaseReference'),
+    objectIds: attributeAcross(features, 'OBJECTID')
+  })
 }
 
 /**

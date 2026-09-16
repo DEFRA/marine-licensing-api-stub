@@ -1,4 +1,5 @@
 import { FAIL_MODES, setEmpStubFailMode } from '../fail-mode.js'
+import { loggablePayload } from './post-emp-features-stub.js'
 
 const ADD_URL = '/ArcGIS/rest/services/Exemptions/FeatureServer/0/addFeatures'
 const UPDATE_URL =
@@ -120,6 +121,44 @@ describe('EMP feature service stub', () => {
 
     expect(response.statusCode).toBe(200)
     expect(JSON.parse(response.payload).updateResults[0].objectId).toBe(1000)
+  })
+
+  describe('what gets logged', () => {
+    const payload = {
+      f: 'json',
+      token: 'supersecret',
+      rollbackOnFailure: 'true'
+    }
+
+    test('identifies added features by case reference', () => {
+      const logged = loggablePayload(payload, [
+        featureFor('EXE/2026/00123', 'Scheduled')
+      ])
+
+      expect(logged.caseReferences).toEqual(['EXE/2026/00123'])
+      expect(logged.statuses).toEqual(['Scheduled'])
+      // An add carries no OBJECTID, so the field is absent rather than [null].
+      expect(logged).not.toHaveProperty('objectIds')
+    })
+
+    test('identifies updated features by object id', () => {
+      const logged = loggablePayload(payload, [
+        { attributes: { OBJECTID: 1000, Status: 'Withdrawn' } },
+        { attributes: { OBJECTID: 1001, Status: 'Withdrawn' } }
+      ])
+
+      expect(logged.objectIds).toEqual([1000, 1001])
+      expect(logged.statuses).toEqual(['Withdrawn', 'Withdrawn'])
+      // An update never sends CaseReference, so it must not appear as [null].
+      expect(logged).not.toHaveProperty('caseReferences')
+    })
+
+    test('never logs the api key', () => {
+      const logged = loggablePayload(payload, [])
+
+      expect(logged.token).toBe('[redacted]')
+      expect(JSON.stringify(logged)).not.toContain('supersecret')
+    })
   })
 
   test('returns no results when no features are sent', async () => {
