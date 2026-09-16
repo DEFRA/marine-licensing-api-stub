@@ -48,7 +48,6 @@ const withoutUndefined = (object) =>
     Object.entries(object).filter(([, value]) => value !== undefined)
   )
 
-// The token is the EMP API key. Never log it.
 export const loggablePayload = (payload, features) => {
   const { token, features: _features, ...rest } = payload ?? {}
 
