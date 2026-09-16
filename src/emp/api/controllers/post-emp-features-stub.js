@@ -48,12 +48,20 @@ const withoutUndefined = (object) =>
     Object.entries(object).filter(([, value]) => value !== undefined)
   )
 
+// `features` is the raw JSON of every feature - kilobytes of geometry, already
+// summarised below. `token` is the EMP API key and is re-emitted redacted.
+// Everything else the caller sends is logged as-is, so a parameter we do not yet
+// know about still shows up.
+const OMITTED_FROM_LOG = new Set(['features', 'token'])
+
 export const loggablePayload = (payload, features) => {
-  const { token, features: _features, ...rest } = payload ?? {}
+  const rest = Object.fromEntries(
+    Object.entries(payload ?? {}).filter(([key]) => !OMITTED_FROM_LOG.has(key))
+  )
 
   return withoutUndefined({
     ...rest,
-    token: token ? '[redacted]' : undefined,
+    token: payload?.token ? '[redacted]' : undefined,
     featureCount: features.length,
     statuses: attributeAcross(features, 'Status'),
     caseReferences: attributeAcross(features, 'CaseReference'),
