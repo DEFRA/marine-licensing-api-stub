@@ -91,6 +91,37 @@ describe('EMP feature service stub', () => {
     expect(payload.updateResults[0].objectId).toBe(1000)
   })
 
+  // A caller that appends the operation itself sends .../addFeatures/addFeatures.
+  // The real ArcGIS service serves that, so the stub must too - otherwise it
+  // fails requests that work in every deployed environment.
+  test('serves a doubled operation path as well as the canonical one', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: `${ADD_URL}/addFeatures`,
+      payload: {
+        f: 'json',
+        features: JSON.stringify([featureFor('EXE/2026/00005', 'Scheduled')])
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(JSON.parse(response.payload).addResults).toHaveLength(1)
+  })
+
+  test('serves a doubled update path too', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: `${UPDATE_URL}/updateFeatures`,
+      payload: {
+        f: 'json',
+        features: JSON.stringify([{ attributes: { OBJECTID: 1000 } }])
+      }
+    })
+
+    expect(response.statusCode).toBe(200)
+    expect(JSON.parse(response.payload).updateResults[0].objectId).toBe(1000)
+  })
+
   test('returns no results when no features are sent', async () => {
     const response = await addFeatures([])
 

@@ -16,15 +16,20 @@ import {
 // Kept separate from the PolicyData_MDP routes: that layer is queried for marine
 // plan policies and answers with `features`, while this one is written to and
 // answers with `addResults`/`updateResults`.
+// The trailing wildcard matches zero or more extra segments, so a caller that
+// appends the operation itself - producing .../addFeatures/addFeatures - is
+// served rather than 404ed. The real ArcGIS service tolerates that, and a stub
+// that did not would fail requests which work in every deployed environment.
+// The full path is logged either way, so the duplication stays visible.
 export const emp = [
   {
     method: 'POST',
-    path: '/ArcGIS/rest/services/Exemptions/FeatureServer/0/addFeatures',
+    path: '/ArcGIS/rest/services/Exemptions/FeatureServer/0/addFeatures/{extra*}',
     ...postEmpAddFeaturesStubController
   },
   {
     method: 'POST',
-    path: '/ArcGIS/rest/services/Exemptions/FeatureServer/0/updateFeatures',
+    path: '/ArcGIS/rest/services/Exemptions/FeatureServer/0/updateFeatures/{extra*}',
     ...postEmpUpdateFeaturesStubController
   },
   {

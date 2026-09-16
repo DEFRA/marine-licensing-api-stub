@@ -185,6 +185,11 @@ Behaviour:
   so a single fixed result would silently lose ids.
 - An update echoes back the `OBJECTID` it was given; an add allocates one.
 - The API key is logged as `[redacted]`.
+- **Extra trailing path segments are tolerated**, so a caller that appends the
+  operation itself and sends `.../addFeatures/addFeatures` is served rather than
+  404ed. The real ArcGIS service accepts that, and a stub that rejected it would
+  fail requests which work in every deployed environment. The full path is
+  logged, so the duplication is still visible.
 
 Each request logs its method, path, query, feature count, and the `Status` and
 `CaseReference` of every feature — which is what makes it useful for confirming
