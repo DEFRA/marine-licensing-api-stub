@@ -40,8 +40,7 @@ describe('GET GOV.UK Policies Stub Endpoint', () => {
           whyIsItImportant: expect.any(String),
           howWillThisBeImplemented: expect.any(String),
           sector: expect.any(String),
-          title: expect.any(String),
-          category: expect.any(String)
+          title: expect.any(String)
         })
       )
     }
