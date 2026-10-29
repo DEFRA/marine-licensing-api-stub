@@ -1,6 +1,7 @@
 import { health } from '#/routes/health.js'
 import { example } from '#/routes/example.js'
 import { arcgis } from '#/arcgis/api/index.js'
+import { emp } from '#/emp/api/index.js'
 import { policies } from '#/policies/api/index.js'
 import { dynamics } from '#/dynamics/api/index.js'
 import { addressLookup } from '#/address-lookup/api/index.js'
@@ -14,6 +15,7 @@ export const router = {
         health,
         ...example,
         ...arcgis,
+        ...emp,
         ...policies,
         ...dynamics,
         ...addressLookup,
