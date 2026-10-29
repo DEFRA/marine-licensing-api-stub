@@ -101,6 +101,14 @@ export const config = convict({
       default: 3600,
       env: 'OAUTH_STUB_TOKEN_TTL_SECONDS'
     }
+  },
+  govPayStub: {
+    publicBaseUrl: {
+      doc: 'Base URL the browser uses to reach this stub, for the next_url of the fake hosted payment page. Differs from the URL the backend uses inside compose.',
+      format: String,
+      default: 'http://localhost:3001',
+      env: 'GOVPAY_STUB_PUBLIC_BASE_URL'
+    }
   }
 })
 
