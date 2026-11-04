@@ -128,8 +128,26 @@ git config --global core.autocrlf false
 | `POST: /dynamics/flows/exemptions/withdraw`                        | Dynamics exemption withdrawal stub (202)      |
 | `POST: /dynamics/flows/exemptions/update`                          | Dynamics exemption update stub (202)          |
 | `POST: /dynamics/flows/marine-licences`                            | Dynamics marine licence submission stub (202) |
+| `POST: /govpay/v1/payments`                                        | GOV.UK Pay create payment (requires Bearer)   |
+| `GET: /govpay/v1/payments/<paymentId>`                             | GOV.UK Pay get payment (requires Bearer)      |
+| `GET: /govpay/pay/<paymentId>/<token>`                             | Fake GOV.UK Pay hosted payment page           |
+| `POST: /govpay/test/payments/<paymentId>/expire`                   | Force a payment to expired (P0020)            |
 | `GET: /example    `                                                | Example API (remove as needed)                |
 | `GET: /example/<id>`                                               | Example API (remove as needed)                |
+
+### GOV.UK Pay stub endpoints
+
+Stands in for the GOV.UK Pay public API, so the backend can take the marine licence fee
+locally without a Pay account. Point `GOVPAY_API_URL` at `<stub>/govpay`; any non-empty
+`GOVPAY_API_KEY` is accepted.
+
+- `next_url` points at a fake hosted page with buttons for Pay, Decline (P0010), Expire (P0020),
+  Cancel (P0030) and Error (P0050). Each sets the payment state and redirects to `return_url`.
+- Like real Pay, a `next_url` works once. `GET /govpay/v1/payments/<id>` returns a fresh one
+  while the payment is unfinished, and the previous one stops working.
+- `GOVPAY_STUB_PUBLIC_BASE_URL` (default `http://localhost:3001`) is the base of `next_url`. It
+  must be the address the browser uses, not the compose hostname.
+- Payments are held in memory (the most recent 1,000) and are lost on restart.
 
 ### ArcGIS stub endpoint
 

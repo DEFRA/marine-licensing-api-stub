@@ -5,6 +5,7 @@ import { policies } from '#/policies/api/index.js'
 import { dynamics } from '#/dynamics/api/index.js'
 import { addressLookup } from '#/address-lookup/api/index.js'
 import { oauth } from '#/oauth/api/index.js'
+import { govPay } from '#/govpay/api/index.js'
 
 export const router = {
   plugin: {
@@ -17,7 +18,8 @@ export const router = {
         ...policies,
         ...dynamics,
         ...addressLookup,
-        ...oauth
+        ...oauth,
+        ...govPay
       ])
     }
   }
