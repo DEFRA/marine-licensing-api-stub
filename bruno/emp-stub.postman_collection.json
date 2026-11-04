@@ -1,0 +1,217 @@
+{
+  "info": {
+    "name": "EMP stub",
+    "description": "Exercises the EMP feature-service stub in marine-licensing-api-stub.\n\nSet the collection variables to match where the stub is running. The backend appends /addFeatures and /updateFeatures to EMP_API_URL itself, so empBaseUrl is the feature-service path.\n\nPayloads are form-encoded with `features` as a JSON string, which is what @esri/arcgis-rest-request sends.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "stubHost",
+      "value": "http://localhost:3002"
+    },
+    {
+      "key": "empBaseUrl",
+      "value": "http://localhost:3002/ArcGIS/rest/services/Exemptions/FeatureServer/0"
+    },
+    {
+      "key": "empApiKey",
+      "value": "anything"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Add - Scheduled (single site)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "f",
+              "value": "json",
+              "type": "text"
+            },
+            {
+              "key": "token",
+              "value": "{{empApiKey}}",
+              "type": "text"
+            },
+            {
+              "key": "rollbackOnFailure",
+              "value": "true",
+              "type": "text"
+            },
+            {
+              "key": "features",
+              "value": "[{\"attributes\":{\"CaseReference\":\"EXE/2026/00123\",\"Status\":\"Scheduled\",\"ApplicationTy\":\"Exempt activity notification\",\"ApplicantName\":\"Test Applicant\",\"Project\":\"Bruno test - scheduled\",\"ActivityTy\":\"Deposit of a substance or object\",\"SubActTy\":\"Construction\",\"ArticleNo\":\"Article 17\",\"IAT_URL\":\"https://example.com/iat/EXE-2026-00123.pdf\",\"ProjStartDate\":\"2026-10-01\",\"ProjStartDateFormatted\":\"1 Oct 2026\",\"ProjEndDate\":\"2026-11-01\",\"ProjEndDateFormatted\":\"1 Nov 2026\",\"SubDate\":\"2026-09-15\",\"SubDateFormatted\":\"15 Sep 2026\",\"PubConsent\":\"Yes\",\"Exemptions_URL\":\"http://localhost:3000/exemption/view-public-details/68c0f1a2b3c4d5e6f7a8b9c0\",\"CoastalOperationsArea\":\"North East\",\"MarinePlanArea\":\"North East Inshore\"},\"geometry\":{\"rings\":[[[-1.3995,55.0198],[-1.3985,55.0198],[-1.3985,55.0188],[-1.3995,55.0188],[-1.3995,55.0198]]],\"spatialReference\":{\"wkid\":4326}}}]",
+              "type": "text"
+            }
+          ]
+        },
+        "url": "{{empBaseUrl}}/addFeatures",
+        "description": "The shape the backend sends on submission. Status is what ML-1500 changed: it was hardcoded \"Active\" even for an exemption starting next month, and now carries the real status.\n\nExpect 200 with one addResults entry, success true, and an allocated objectId. Note that id - request 03 updates it."
+      },
+      "response": []
+    },
+    {
+      "name": "02 Add - Active (two circle sites)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "f",
+              "value": "json",
+              "type": "text"
+            },
+            {
+              "key": "token",
+              "value": "{{empApiKey}}",
+              "type": "text"
+            },
+            {
+              "key": "rollbackOnFailure",
+              "value": "true",
+              "type": "text"
+            },
+            {
+              "key": "features",
+              "value": "[{\"attributes\":{\"CaseReference\":\"EXE/2026/00124\",\"Status\":\"Active\",\"ApplicationTy\":\"Exempt activity notification\",\"ApplicantName\":\"Test Organisation Ltd\",\"Project\":\"Bruno test - two circles\",\"ActivityTy\":\"Deposit of a substance or object\",\"SubActTy\":\"Construction\",\"ArticleNo\":\"Article 17\",\"IAT_URL\":\"https://example.com/iat/EXE-2026-00124.pdf\",\"ProjStartDate\":\"2026-09-15\",\"ProjStartDateFormatted\":\"15 Sep 2026\",\"ProjEndDate\":\"2026-10-15\",\"ProjEndDateFormatted\":\"15 Oct 2026\",\"SubDate\":\"2026-09-15\",\"SubDateFormatted\":\"15 Sep 2026\",\"PubConsent\":\"No\",\"Exemptions_URL\":\"http://localhost:3000/exemption/view-public-details/68c0f1a2b3c4d5e6f7a8b9c1\",\"CoastalOperationsArea\":\"North East\",\"MarinePlanArea\":\"North East Inshore\"},\"geometry\":{\"rings\":[[[-1.3995,55.0198],[-1.3985,55.0198],[-1.3985,55.0188],[-1.3995,55.0188],[-1.3995,55.0198]]],\"spatialReference\":{\"wkid\":4326}}},{\"attributes\":{\"CaseReference\":\"EXE/2026/00124\",\"Status\":\"Active\",\"ApplicationTy\":\"Exempt activity notification\",\"ApplicantName\":\"Test Organisation Ltd\",\"Project\":\"Bruno test - two circles\",\"ActivityTy\":\"Deposit of a substance or object\",\"SubActTy\":\"Construction\",\"ArticleNo\":\"Article 17\",\"IAT_URL\":\"https://example.com/iat/EXE-2026-00124.pdf\",\"ProjStartDate\":\"2026-09-15\",\"ProjStartDateFormatted\":\"15 Sep 2026\",\"ProjEndDate\":\"2026-10-15\",\"ProjEndDateFormatted\":\"15 Oct 2026\",\"SubDate\":\"2026-09-15\",\"SubDateFormatted\":\"15 Sep 2026\",\"PubConsent\":\"No\",\"Exemptions_URL\":\"http://localhost:3000/exemption/view-public-details/68c0f1a2b3c4d5e6f7a8b9c1\",\"CoastalOperationsArea\":\"North East\",\"MarinePlanArea\":\"North East Inshore\"},\"geometry\":{\"rings\":[[[-1.4005,55.0208],[-1.3995,55.0208],[-1.3995,55.0198],[-1.4005,55.0198],[-1.4005,55.0208]]],\"spatialReference\":{\"wkid\":4326}}}]",
+              "type": "text"
+            }
+          ]
+        },
+        "url": "{{empBaseUrl}}/addFeatures",
+        "description": "One exemption, two features. A manual circle site is sent as its own feature so ArcGIS renders a centroid per circle; both carry identical exemption-level attributes and differ only in geometry.\n\nThis is the case a naive stub gets wrong. The backend does addResults.map(r => r.objectId) and stores every one, so a single fixed result would silently lose an id.\n\nExpect 200 with TWO addResults entries and DISTINCT objectIds."
+      },
+      "response": []
+    },
+    {
+      "name": "03 Update - status push (Scheduled to Active)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "f",
+              "value": "json",
+              "type": "text"
+            },
+            {
+              "key": "token",
+              "value": "{{empApiKey}}",
+              "type": "text"
+            },
+            {
+              "key": "rollbackOnFailure",
+              "value": "true",
+              "type": "text"
+            },
+            {
+              "key": "features",
+              "value": "[{\"attributes\":{\"OBJECTID\":1000,\"Status\":\"Active\"}}]",
+              "type": "text"
+            }
+          ]
+        },
+        "url": "{{empBaseUrl}}/updateFeatures",
+        "description": "What the nightly job sends - the new behaviour in ML-1500. Note how little it carries: only OBJECTID and Status, not the whole feature.\n\nSwap Status for \"Expired\" or \"Withdrawn\" for the other transitions. Withdrawn comes from the existing withdrawal path, unchanged by this ticket.\n\nExpect 200 with updateResults echoing OBJECTID 1000 back rather than allocating a new id."
+      },
+      "response": []
+    },
+    {
+      "name": "04 Update - both features of a two-site exemption",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "f",
+              "value": "json",
+              "type": "text"
+            },
+            {
+              "key": "token",
+              "value": "{{empApiKey}}",
+              "type": "text"
+            },
+            {
+              "key": "rollbackOnFailure",
+              "value": "true",
+              "type": "text"
+            },
+            {
+              "key": "features",
+              "value": "[{\"attributes\":{\"OBJECTID\":1000,\"Status\":\"Expired\"}},{\"attributes\":{\"OBJECTID\":1001,\"Status\":\"Expired\"}}]",
+              "type": "text"
+            }
+          ]
+        },
+        "url": "{{empBaseUrl}}/updateFeatures",
+        "description": "A status push for the exemption from request 02. The backend maps over every stored feature id, so a multi-site exemption updates all of them in one call.\n\nExpect 200 with two updateResults echoing 1000 and 1001."
+      },
+      "response": []
+    },
+    {
+      "name": "05 Fail mode - read",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{stubHost}}/emp-stub/fail-mode",
+        "description": "Expect 200 and {\"mode\":\"none\"} unless something changed it. The default comes from EMP_STUB_FAIL_MODE and a restart returns to it."
+      },
+      "response": []
+    },
+    {
+      "name": "06 Fail mode - set",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mode\": \"update\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{stubHost}}/emp-stub/fail-mode",
+        "description": "none | add | update | all.\n\nSet \"update\", re-run request 03, and updateResults comes back success false with an error description - an API-level failure, which the backend handles differently from the connection error an unreachable host would give. That is the path its retry and dead-letter handling actually exercises.\n\nSet back to \"none\" when finished. An unknown mode returns 400 and leaves the current mode alone."
+      },
+      "response": []
+    }
+  ]
+}
