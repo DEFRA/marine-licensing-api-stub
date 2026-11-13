@@ -50,6 +50,6 @@ export const dynamics = [
   {
     method: 'POST',
     path: '/dynamics/flows/marine-licences/update',
-    ...postSubmissionStubController('consultationResponse')
+    ...postSubmissionStubController('marineLicenceUpdate')
   }
 ]

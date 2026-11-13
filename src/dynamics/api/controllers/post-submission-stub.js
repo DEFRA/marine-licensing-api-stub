@@ -4,7 +4,7 @@ const ACCEPTED = 202
 /**
  * Builds a controller for one of the Dynamics submission flows. Every flow behaves
  * the same way: accept whatever it is sent, log it, and return 202.
- * @param {string} operation - submit | withdraw | update | marineLicence | consultationResponse
+ * @param {string} operation - submit | withdraw | update | marineLicence | marineLicenceUpdate
  */
 export const postSubmissionStubController = (operation) => ({
   options: {
