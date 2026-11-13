@@ -15,7 +15,8 @@ describe('Dynamics Submission Stub Endpoints', () => {
     ['/dynamics/flows/exemptions', 'submit'],
     ['/dynamics/flows/exemptions/withdraw', 'withdraw'],
     ['/dynamics/flows/exemptions/update', 'update'],
-    ['/dynamics/flows/marine-licences', 'marineLicence']
+    ['/dynamics/flows/marine-licences', 'marineLicence'],
+    ['/dynamics/flows/marine-licences/update', 'marineLicenceUpdate']
   ])('POST %s returns 202', async (url, operation) => {
     const reference = `EXE/2025/${operation}`
 
