@@ -10,7 +10,7 @@ import { postSubmissionStubController } from './controllers/post-submission-stub
 //   DYNAMICS_API_WITHDRAW_URL              -> /dynamics/flows/exemptions/withdraw
 //   DYNAMICS_API_UPDATE_EXEMPTION_URL      -> /dynamics/flows/exemptions/update
 //   DYNAMICS_MARINE_LICENCE_API_URL        -> /dynamics/flows/marine-licences
-//   (consultation responses)               -> /dynamics/flows/marine-licence/consultation-response
+//   DYNAMICS_API_UPDATE_MARINE_LICENCE_URL -> /dynamics/flows/marine-licences/update
 export const dynamics = [
   {
     method: 'POST',
@@ -49,7 +49,7 @@ export const dynamics = [
   },
   {
     method: 'POST',
-    path: '/dynamics/flows/marine-licence/consultation-response',
+    path: '/dynamics/flows/marine-licences/update',
     ...postSubmissionStubController('consultationResponse')
   }
 ]
